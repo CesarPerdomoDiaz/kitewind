@@ -1,0 +1,169 @@
+# Kite Wind configuration: defaults and an example site.
+# Put your own values in config.local.toml inside the data folder (same sections, only what
+# changes); that file is never published. Keys and passwords never go in either file.
+
+[site]
+name = "Example site"
+lat = 40.4168
+lon = -3.7038
+# Ground height above sea level, used to turn pressure-level heights into heights above ground.
+elevation_m = 650
+
+[operation]
+# Heights above ground where the wind is evaluated. The band is the whole operating range.
+heights_m = [10, 25, 50, 75, 100, 125, 150]
+# Only daylight hours can be GO.
+daylight_only = true
+# Hours shown on the dashboard.
+horizon_hours = 72
+
+# Go/no-go limits. "caution" makes an hour amber, "nogo" makes it red.
+# Gusts are not used: the system is rated on mean wind.
+[limits]
+# Mean wind averaged over the operating band (10-150 m), m/s.
+min_wind = 5.0
+# Ensemble chance of reaching min_wind below which a GO turns amber.
+min_wind_probability = 0.5
+# Share of the main forecasts that must agree on enough wind before an hour is a clean GO.
+min_agreement = 0.6
+# Too much wind aloft, m/s. Set these from your kite's limits.
+max_wind_caution = 11.0
+max_wind_nogo = 14.0
+# Rain must be essentially zero. Models print trace amounts below 0.05 mm/h; anything above is no-go.
+rain_nogo = 0.05
+# Ensemble chance of rain that turns a dry hour amber.
+rain_probability_caution = 0.2
+# A forecast thunderstorm is no-go: a storm weather code, CAPE above cape_nogo,
+# or CAPE above cape_caution with rain. Dry CAPE above cape_caution is amber.
+cape_caution = 400
+cape_nogo = 1000
+# Ensemble chance of a thunderstorm that is enough for no-go.
+storm_probability_nogo = 0.2
+# Only fog thick enough to hide 100 m matters, m.
+visibility_nogo = 100
+
+# --- Windy Point Forecast API --------------------------------------------------------------
+[windy]
+# The free Testing key allows 500 requests a day; keep some for retries.
+daily_cap = 490
+# Testing-key data is shuffled on purpose. It is fetched and shown, but only decides
+# anything with a Professional key, unless this is set to true.
+use_testing_data = false
+
+# neighbours_deg adds four points around the site (N, S, E, W) at that distance.
+[[windy_models]]
+name = "arome"
+label = "AROME (Windy)"
+resolution = "1.3 km"
+every_minutes = 30
+neighbours_deg = 0.02
+
+[[windy_models]]
+name = "iconEu"
+label = "ICON-EU (Windy)"
+resolution = "7 km"
+every_minutes = 60
+neighbours_deg = 0.07
+
+[[windy_models]]
+name = "icon"
+label = "ICON (Windy)"
+resolution = "13 km"
+every_minutes = 30
+neighbours_deg = 0
+
+[[windy_models]]
+name = "gfs"
+label = "GFS (Windy)"
+resolution = "25 km"
+every_minutes = 30
+neighbours_deg = 0
+
+# --- Open-Meteo (free, no key) -------------------------------------------------------------
+[openmeteo]
+every_minutes = 30
+ensemble_every_minutes = 60
+forecast_days = 4
+
+[[openmeteo_models]]
+name = "meteofrance_arome_france_hd"
+label = "AROME HD"
+resolution = "1.3 km"
+
+[[openmeteo_models]]
+name = "meteofrance_arome_france"
+label = "AROME"
+resolution = "2.5 km"
+
+[[openmeteo_models]]
+name = "icon_eu"
+label = "ICON-EU"
+resolution = "7 km"
+
+[[openmeteo_models]]
+name = "ecmwf_ifs"
+label = "ECMWF IFS"
+resolution = "9 km"
+
+[[openmeteo_models]]
+name = "meteofrance_arpege_europe"
+label = "ARPEGE"
+resolution = "10 km"
+
+[[openmeteo_models]]
+name = "ukmo_global_deterministic_10km"
+label = "UK Met Office"
+resolution = "10 km"
+
+[[openmeteo_models]]
+name = "gfs_seamless"
+label = "GFS"
+resolution = "13 km"
+
+# Ensembles: many runs of one model with slightly different starts. They give the shaded
+# 10-90 % band and the chances. Each ensemble counts the same, whatever its member count.
+[[ensembles]]
+name = "ecmwf_ifs025"
+label = "ECMWF ENS"
+resolution = "25 km"
+
+[[ensembles]]
+name = "icon_eu"
+label = "ICON-EU EPS"
+resolution = "13 km"
+
+[[ensembles]]
+name = "gfs025"
+label = "GEFS"
+resolution = "25 km"
+
+[[ensembles]]
+name = "ukmo_global_ensemble_20km"
+label = "MOGREPS-G"
+resolution = "20 km"
+
+[decision]
+# Best first: for every hour, the first of these with data decides; the next ones fill in
+# what it lacks (storm codes, visibility). Ids: om:<name>, windy:<name>.
+rank = [
+  "om:meteofrance_arome_france_hd", "om:meteofrance_arome_france", "windy:arome",
+  "om:icon_eu", "windy:iconEu", "om:ecmwf_ifs", "om:meteofrance_arpege_europe",
+  "om:ukmo_global_deterministic_10km", "windy:icon", "om:gfs_seamless", "windy:gfs",
+]
+
+[publish]
+# Push the forecast to a GitHub repository every few minutes, for the GitHub Pages page.
+# "auto": only when repo is set and the data folder holds a deploy key named deploy_key.
+enabled = "auto"
+repo = ""                 # e.g. "git@github.com:<you>/<repo>.git", in config.local.toml
+branch = "data"
+every_minutes = 10
+# Keep Windy data off the public page (its terms; and Testing-key data is shuffled).
+include_windy = false
+# Name shown on the public page, instead of the site's real name and coordinates.
+site_name = "Test site"
+
+[server]
+# Only reachable from the computer itself.
+host = "127.0.0.1"
+port = 8740

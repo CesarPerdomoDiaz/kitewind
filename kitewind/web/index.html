@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kite Wind</title>
+<meta name="description" content="Go/no-go wind forecast for an airborne wind energy test site">
+<meta name="theme-color" content="#104281">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kite Wind">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <div class="brand">Kite Wind</div>
+    <div class="site" id="site">…</div>
+  </div>
+  <div class="top-right">
+    <div class="lang" role="group" aria-label="Language / Idioma">
+      <button type="button" data-lang="en" title="English" aria-label="English">
+        <svg viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><clipPath id="uk-s"><path d="M0,0 v30 h60 v-30 z"/></clipPath><clipPath id="uk-t"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath><g clip-path="url(#uk-s)"><path d="M0,0 v30 h60 v-30 z" fill="#012169"/><path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uk-t)" stroke="#C8102E" stroke-width="4"/><path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/><path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6"/></g></svg>
+      </button>
+      <button type="button" data-lang="es" title="Español" aria-label="Español">
+        <svg viewBox="0 0 60 40" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="60" height="40" fill="#AA151B"/><rect y="10" width="60" height="20" fill="#F1BF00"/></svg>
+      </button>
+    </div>
+    <div class="meta" id="meta"></div>
+  </div>
+</header>
+
+<div id="banner" class="banner" hidden></div>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="verdict">
+      <div class="badge" id="badge">…</div>
+      <div>
+        <div class="when" id="when"></div>
+        <div class="why" id="why"></div>
+      </div>
+    </div>
+    <div class="next" id="next"></div>
+    <div class="drivers" id="drivers"></div>
+  </section>
+
+  <section class="days" id="days"></section>
+
+  <section class="charts" id="charts">
+    <div class="chart-head">
+      <h2 data-i18n="next3"></h2>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="chart" id="c-status"></div>
+    <h3><span data-i18n="windTitle"></span> <span class="hint" data-i18n="windHint"></span></h3>
+    <div class="chart" id="c-wind"></div>
+    <h3><span data-i18n="probTitle"></span> <span class="hint" data-i18n="probHint"></span></h3>
+    <div class="chart" id="c-prob"></div>
+    <h3><span data-i18n="heightsTitle"></span> <span class="hint" data-i18n="heightsHint"></span></h3>
+    <div class="chart" id="c-heights"></div>
+    <div class="small-multiples">
+      <div><h3><span data-i18n="rainTitle"></span> <span class="hint" data-i18n="bestModel"></span></h3><div class="chart" id="c-rain"></div></div>
+      <div><h3 data-i18n="rainProbTitle"></h3><div class="chart" id="c-rainp"></div></div>
+      <div><h3 data-i18n="stormProbTitle"></h3><div class="chart" id="c-storm"></div></div>
+    </div>
+    <div id="tooltip" class="tooltip" hidden></div>
+  </section>
+
+  <section class="sources">
+    <h2 data-i18n="sources"></h2>
+    <table id="models"></table>
+    <p class="fine" id="fine"></p>
+  </section>
+</main>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

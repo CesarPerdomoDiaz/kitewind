@@ -1,0 +1,7 @@
+data/
+data-demo/
+__pycache__/
+*.pyc
+secrets.env
+deploy_key*
+.claude/

@@ -1,0 +1,43 @@
+# Publish the dashboard page on GitHub Pages. The forecast itself is not built here: the
+# computer that runs the app pushes it to the "data" branch, and the page reads it from there.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["kitewind/web/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble the site
+        run: |
+          mkdir _site
+          cp -r kitewind/web/. _site/
+          echo "window.KITEWIND_DATA = \"https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/data/forecast.json\";" > _site/config.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
