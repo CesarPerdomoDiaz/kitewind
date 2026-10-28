@@ -45,6 +45,14 @@ chance of enough wind for every hour, the likely range of the wind (the middle 8
 ensemble runs), the wind at each height, and the chances of rain and of a thunderstorm. Hover or
 tap any hour to see every model's value.
 
+## Alerts on your phone
+
+The team follows a Telegram channel where only the Kite Wind bot posts. As soon as a forecast
+shows a flyable window (at least 2 GO hours in a row in the next three days) it posts the day,
+the hours, the expected wind and its chance, in Spanish and English. It does not repeat itself:
+you only hear about that window again if it moves or changes length by 2 hours or more, if two
+forecasts in a row drop it (with the reason), and on the morning of the day.
+
 ## How it runs
 
 One always-on computer runs the app (plain Python, no extra packages). It downloads the
@@ -77,6 +85,11 @@ python -m unittest discover -s tests
    the source, and add a deploy key with write access (Settings → Deploy keys). Save the private
    half as `deploy_key` in the app's data folder, readable only by the account that runs the
    app, and set `repo` under `[publish]` in your `config.local.toml`. Publishing starts by itself.
+5. **Alerts (optional).** Create a bot with Telegram's @BotFather and a channel, and add the bot
+   to the channel as an administrator allowed to post. Give the app the bot token as the
+   `TELEGRAM_BOT_TOKEN` environment variable, run `python -m kitewind --telegram-chats` to find
+   the channel's id, put it as `chat_id` under `[notify]` in `config.local.toml`, and check with
+   `python -m kitewind --telegram-test`.
 
 ## Credits
 
@@ -92,4 +105,5 @@ días indica **APTO**, **MARGINAL** o **NO APTO**, y por qué. **[Abrir el pron�
 (cambia el idioma con las banderas). En iPhone: Safari → Compartir → **Añadir a pantalla de
 inicio**. Combina siete modelos meteorológicos y 140 ejecuciones de conjuntos (ensembles), calcula
 el viento medio entre 10 y 150 m, y aplica los límites: viento medio de al menos 5 m/s, nada de
-lluvia, nada de tormentas y niebla solo si la visibilidad baja de 100 m.
+lluvia, nada de tormentas y niebla solo si la visibilidad baja de 100 m. Un canal de Telegram
+avisa en cuanto aparece una ventana apta de al menos 2 horas.

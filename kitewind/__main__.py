@@ -8,6 +8,7 @@ import logging.handlers
 from pathlib import Path
 
 from . import config, server
+from .notify import Notifier
 from .scheduler import Scheduler
 from .store import Store
 
@@ -21,6 +22,8 @@ def main() -> None:
     ap.add_argument("--demo", action="store_true", help="made-up forecasts, no API key needed")
     ap.add_argument("--once", action="store_true", help="fetch what is due, print a summary, exit")
     ap.add_argument("--port", type=int)
+    ap.add_argument("--telegram-chats", action="store_true", help="list the chats the alert bot has been added to")
+    ap.add_argument("--telegram-test", action="store_true", help="send a test message to the alert chat")
     args = ap.parse_args()
 
     args.data.mkdir(parents=True, exist_ok=True)
@@ -31,6 +34,16 @@ def main() -> None:
     log = logging.getLogger("kitewind")
 
     cfg = config.load(args.config, args.data, demo=args.demo)
+    if args.telegram_chats or args.telegram_test:
+        n = Notifier(args.data, cfg.notify)
+        if not n.token:
+            raise SystemExit("no bot token: set TELEGRAM_BOT_TOKEN (or put it in secrets.env)")
+        if args.telegram_chats:
+            for chat_id, kind, title in n.chats() or [("-", "-", "none yet: add the bot to the channel as an admin")]:
+                print(f"{chat_id}\t{kind}\t{title}")
+        if args.telegram_test:
+            raise SystemExit(0 if n.chat_id and n.test() else "test message not sent (is chat_id set?)")
+        return
     if args.port:
         cfg.port = args.port
     elif cfg.demo:

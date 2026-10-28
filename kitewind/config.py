@@ -80,6 +80,7 @@ class Config:
     rank: list[str] = field(default_factory=list)
     use_windy_testing: bool = False
     publish: dict = field(default_factory=dict)
+    notify: dict = field(default_factory=dict)
     api_key: str | None = None
     demo: bool = False
 
@@ -163,6 +164,7 @@ def load(config_path: Path, data_dir: Path, demo: bool = False) -> Config:
         rank=list(rank),
         use_windy_testing=bool(windy.get("use_testing_data", False)),
         publish=dict(raw.get("publish", {})),
+        notify=dict(raw.get("notify", {})),
         api_key=os.environ.get("WINDY_API_KEY") or None,
         demo=demo,
     )

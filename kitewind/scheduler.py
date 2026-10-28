@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 from . import forecast, openmeteo, windy
 from .config import Config
+from .notify import Notifier
 from .publish import Publisher
 from .store import Store
 
@@ -66,6 +67,9 @@ class Scheduler:
         self.publisher = Publisher(cfg.data_dir, cfg.publish, cfg.demo)
         if self.publisher.active:
             log.info("publishing to %s every %d min", cfg.publish.get("repo"), self.publisher.every_ms // 60_000)
+        self.notifier = Notifier(cfg.data_dir, cfg.notify, demo=cfg.demo)
+        if self.notifier.active:
+            log.info("Telegram alerts on for windows of %d h or more", self.notifier.min_hours)
 
     # --- budget (Windy only) ---
     def used_today(self) -> int:
@@ -153,6 +157,7 @@ class Scheduler:
                 if fetched or now_ms() - last_rebuild > 300_000:
                     self.rebuild()
                     last_rebuild = now_ms()
+                    self.notifier.check(self.snapshot, now_ms())
                 if self.publisher.due(now_ms()) and self.snapshot:
                     with self.snapshot_lock:
                         snap = self.snapshot

@@ -163,6 +163,26 @@ include_windy = false
 # Name shown on the public page, instead of the site's real name and coordinates.
 site_name = "Test site"
 
+[notify]
+# Telegram alerts when a flyable window appears. Needs a bot token (environment variable
+# TELEGRAM_BOT_TOKEN) and the chat to post to, both kept out of this file: put chat_id in
+# config.local.toml. `python -m kitewind --telegram-chats` lists the chats the bot is in.
+chat_id = ""
+# Shortest run of GO hours worth an alert.
+min_hours = 2
+# A window that moves or changes length by this many hours gets an update message.
+change_hours = 2
+# Forecast updates in a row without the window before it is called off.
+cancel_after = 2
+# Local hour of the same-day reminder (-1: none). Times use the offset and EU summer time below.
+morning_hour = 8
+utc_offset_h = 1
+eu_summer_time = true
+# Message languages, in order ("es", "en").
+languages = ["es", "en"]
+# Link added to every message.
+page_url = ""
+
 [server]
 # Only reachable from the computer itself.
 host = "127.0.0.1"
