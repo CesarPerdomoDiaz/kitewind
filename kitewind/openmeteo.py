@@ -73,8 +73,17 @@ def runs(body: dict) -> list[dict[str, list]]:
 
 # --- Fake source -----------------------------------------------------------------------------
 
-_FAKE_MEMBERS = {"ecmwf_ifs025": 51, "icon_eu": 40, "gfs025": 31, "ukmo_global_ensemble_20km": 18}
+_FAKE_MEMBERS = {"ecmwf_ifs025": 51, "icon_eu": 40, "gfs025": 31, "ukmo_global_ensemble_20km": 18,
+                 "ecmwf_aifs025": 51}
 _FAKE_LEN = {"meteofrance_arome_france_hd": 51, "meteofrance_arome_france": 51}
+# Fields a model does not give, as the real API returns them: all None.
+_FAKE_MISSING = {
+    ("meteofrance_arome_france_hd", False): ["weather_code", "visibility", "wind_speed_120m", "wind_speed_150m",
+                                             "wind_speed_180m", "wind_speed_200m"],
+    ("ecmwf_aifs025_single", False): ["wind_speed_20m", "wind_speed_50m", "wind_speed_150m", "wind_speed_180m",
+                                      "wind_speed_200m", "cape", "visibility"],
+    ("ecmwf_aifs025", True): ["cape"],
+}
 
 
 def fake_fetch(model: str, ensemble: bool, now_ms: int, days: int = 4) -> dict:
@@ -118,10 +127,8 @@ def fake_fetch(model: str, ensemble: bool, now_ms: int, days: int = 4) -> dict:
             cols["wind_direction_100m"] = [None if v is None else (v + 15) % 360 for v in cols["wind_direction_10m"]]
             cols["visibility"] = [None if p is None else 24000 - min(23000, p * 15000) for p in cols["precipitation"]]
             cols["temperature_2m"] = [None if v is None else 14.0 for v in cols["wind_direction_10m"]]
-            if model == "meteofrance_arome_france_hd":  # like the real one: no storm codes, no 120 m+
-                for k in ["weather_code", "visibility", "wind_speed_120m", "wind_speed_150m",
-                          "wind_speed_180m", "wind_speed_200m"]:
-                    cols[k] = [None] * n
+        for k in _FAKE_MISSING.get((model, ensemble), []):
+            cols[k] = [None] * n
         for k, v in cols.items():
             hourly[k + suffix] = v
     return {"latitude": 40.42, "longitude": -3.7, "elevation": 650.0, "hourly": hourly}

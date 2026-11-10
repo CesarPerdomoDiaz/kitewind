@@ -120,6 +120,13 @@ name = "gfs_seamless"
 label = "GFS"
 resolution = "13 km"
 
+# ECMWF's AI model. Runs every 6 hours with 6-hourly steps that Open-Meteo interpolates to
+# hours; wind at 10 and 80-120 m, no CAPE or visibility.
+[[openmeteo_models]]
+name = "ecmwf_aifs025_single"
+label = "ECMWF AIFS"
+resolution = "28 km"
+
 # Ensembles: many runs of one model with slightly different starts. They give the shaded
 # 10-90 % band and the chances. Each ensemble counts the same, whatever its member count.
 [[ensembles]]
@@ -142,6 +149,12 @@ name = "ukmo_global_ensemble_20km"
 label = "MOGREPS-G"
 resolution = "20 km"
 
+# ECMWF's AI ensemble, 51 runs, 6-hourly steps interpolated to hours.
+[[ensembles]]
+name = "ecmwf_aifs025"
+label = "AIFS ENS"
+resolution = "25 km"
+
 [decision]
 # Best first: for every hour, the first of these with data decides; the next ones fill in
 # what it lacks (storm codes, visibility). Ids: om:<name>, windy:<name>.
@@ -149,6 +162,7 @@ rank = [
   "om:meteofrance_arome_france_hd", "om:meteofrance_arome_france", "windy:arome",
   "om:icon_eu", "windy:iconEu", "om:ecmwf_ifs", "om:meteofrance_arpege_europe",
   "om:ukmo_global_deterministic_10km", "windy:icon", "om:gfs_seamless", "windy:gfs",
+  "om:ecmwf_aifs025_single",
 ]
 
 [publish]

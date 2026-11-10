@@ -16,10 +16,11 @@ The page shows when the forecast was last updated, and warns you in red if it is
 
 ## How the prediction is made
 
-**1. Many forecasts, not just one.** Every 30 minutes the app downloads the latest runs of seven
+**1. Many forecasts, not just one.** Every 30 minutes the app downloads the latest runs of eight
 weather models for the site, from the very detailed (AROME HD, a 1.3 km grid) to the global
-ones (ECMWF, GFS, and others). Every hour it also downloads four *ensembles*: the same model run
-dozens of times with slightly different starting conditions, 140 runs in total. Where the
+ones (ECMWF, GFS, and others), including ECMWF's AI model, AIFS. Every hour it also downloads five
+*ensembles*: the same model run dozens of times with slightly different starting conditions,
+191 runs in total. Where the
 ensemble runs agree, the forecast is reliable; where they spread out, it is uncertain.
 
 **2. The wind where the kite flies, not on the ground.** Weather apps usually give the wind at
@@ -103,7 +104,7 @@ Office models) and the Windy Point Forecast API.
 **Kite Wind** dice de un vistazo si se puede volar la cometa: para cada hora de los próximos tres
 días indica **APTO**, **MARGINAL** o **NO APTO**, y por qué. **[Abrir el pronóstico](https://cesarperdomodiaz.github.io/kitewind/)**
 (cambia el idioma con las banderas). En iPhone: Safari → Compartir → **Añadir a pantalla de
-inicio**. Combina siete modelos meteorológicos y 140 ejecuciones de conjuntos (ensembles), calcula
+inicio**. Combina ocho modelos meteorológicos (entre ellos AIFS, el modelo de IA del ECMWF) y 191 ejecuciones de conjuntos (ensembles), calcula
 el viento medio entre 10 y 150 m, y aplica los límites: viento medio de al menos 5 m/s, nada de
 lluvia, nada de tormentas y niebla solo si la visibilidad baja de 100 m. Un canal de Telegram
 avisa en cuanto aparece una ventana apta de al menos 2 horas.

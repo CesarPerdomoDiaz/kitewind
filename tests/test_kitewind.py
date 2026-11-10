@@ -165,7 +165,7 @@ class BudgetTests(unittest.TestCase):
             self.assertEqual(h["primary"], "om:meteofrance_arome_france_hd")
             self.assertGreaterEqual(h["n_members"], 12)
             self.assertEqual(h["band"], "ensemble")
-            self.assertEqual(h["n_runs"], 51 + 40 + 31 + 18)
+            self.assertEqual(h["n_runs"], 51 + 40 + 31 + 18 + 51)
             self.assertEqual(len(h["profile"]), len(cfg.heights_m))
             self.assertTrue(all(m["fetched"] for m in snap["models"]))
             store.close()
@@ -235,6 +235,22 @@ class OpenMeteoTests(unittest.TestCase):
             self.assertAlmostEqual(m.profile[0][2], 6.0)          # 50 m measured
             self.assertAlmostEqual(m.profile[0][4], 7.0)          # 100 m measured
             self.assertGreater(m.profile[0][-1], 7.0)             # 150 m extended upward
+
+    def test_aifs_shapes(self):
+        """AIFS: 10 m and 80-120 m wind, no CAPE or visibility; its ensemble has 51 runs, no CAPE."""
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            cfg = load_cfg(tmp)
+            self.assertIn("om:ecmwf_aifs025_single", cfg.rank)
+            self.assertIn("ens:ecmwf_aifs025", [m.id for m in cfg.ensembles])
+            det = openmeteo.runs(openmeteo.fake_fetch("ecmwf_aifs025_single", False, NOW))[0]
+            ts = [int(t) * 1000 for t in openmeteo.fake_fetch("ecmwf_aifs025_single", False, NOW)["hourly"]["time"]]
+            m = forecast.om_member("om:ecmwf_aifs025_single", 0, det, ts, cfg, "det")
+            self.assertEqual(m.heights, [10, 80, 100, 120])
+            self.assertTrue(all(b is not None for b in m.band))
+            self.assertIsNotNone(forecast._storm(m, ts[0], cfg.limits))  # weather code alone is enough
+            ens = openmeteo.runs(openmeteo.fake_fetch("ecmwf_aifs025", True, NOW))
+            self.assertEqual(len(ens), 51)
+            self.assertTrue(all(x is None for x in ens[0]["cape"]))
 
     def test_weighted_quantiles(self):
         pairs = [(1.0, 0.5), (2.0, 0.25), (3.0, 0.25)]

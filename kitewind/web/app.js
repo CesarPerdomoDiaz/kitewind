@@ -9,6 +9,7 @@ const STALE_MS = 45 * 60e3;  // the forecast is published every ~10 min
 
 const f1 = (x) => (x == null ? "–" : fmtNum(+x, 1));
 const pct = (p) => `${Math.round(p * 100)}%`;
+const nEns = (d) => (d.models || []).filter((m) => m.source === "Open-Meteo ensemble").length;
 
 const I18N = {
   en: {
@@ -67,7 +68,7 @@ const I18N = {
     fine: (L, d, windy) =>
       `Each hour is decided by the finest model that covers it (AROME HD, 1.3 km, first); the next ones fill in what it ` +
       `lacks, such as storm codes. Wind is the height-averaged mean over ${d.heights[0]}–${d.heights[d.heights.length - 1]} m ` +
-      `above the ground. The likely range and the chances come from four ensembles, each counted equally. ` +
+      `above the ground. The likely range and the chances come from ${nEns(d)} ensembles, each counted equally. ` +
       `Limits: mean wind ≥ ${L.min_wind} m/s; no rain (≥ ${L.rain_nogo} mm/h is no-go); no thunderstorm; ` +
       `fog only below ${L.visibility_nogo} m. Gusts are not used. ` +
       (windy && !d.windy_used ? "Windy data is shown for comparison and decides nothing while its key is a Testing key. " : "") +
@@ -145,7 +146,7 @@ const I18N = {
     fine: (L, d, windy) =>
       `Cada hora la decide el modelo más fino que la cubre (primero AROME HD, 1,3 km); los siguientes completan lo que ` +
       `le falta, como los códigos de tormenta. El viento es la media en altura entre ${d.heights[0]} y ` +
-      `${d.heights[d.heights.length - 1]} m sobre el suelo. El rango probable y las probabilidades salen de cuatro ` +
+      `${d.heights[d.heights.length - 1]} m sobre el suelo. El rango probable y las probabilidades salen de ${nEns(d)} ` +
       `conjuntos (ensembles), cada uno con el mismo peso. Límites: viento medio ≥ ${L.min_wind} m/s; sin lluvia ` +
       `(≥ ${L.rain_nogo} mm/h es no apto); sin tormenta; la niebla solo cuenta por debajo de ${L.visibility_nogo} m. ` +
       `No se usan las rachas. ` +
