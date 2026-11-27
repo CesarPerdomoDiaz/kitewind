@@ -116,13 +116,29 @@ class AlertFlowTests(unittest.TestCase):
         self.assertEqual(again.sent, [])
 
     def test_morning_reminder_once(self):
-        n = FakeNotifier(self.tmp.name, morning_hour=8)
+        n = FakeNotifier(self.tmp.name, morning_hour=8, same_day=True)
         n.check(snap(hours(34, 39), 1), self.now)                  # announced the day before
         morning = DAY0 + 24 * HOUR + 7 * HOUR + 15 * 60_000          # 08:15 local the next day
         n.check(snap(hours(34, 39), 1), morning)
         n.check(snap(hours(34, 39), 1), morning + 600_000)
         self.assertEqual(len(n.sent), 2)
         self.assertIn("Hoy hay ventana apta</b>: 11:00–16:00", n.sent[1])
+
+    def test_team_rules_weekdays_and_day_before(self):
+        n = FakeNotifier(self.tmp.name, morning_hour=8, same_day=False,
+                         fly_days=["mon", "tue", "wed", "thu", "fri"])
+        n.check(snap(hours(10, 15), 1), self.now)                  # today (Tuesday): too late to decide
+        self.assertEqual(n.sent, [])
+        n.check(snap(hours(4 * 24 + 10, 4 * 24 + 15, n=150), 2), self.now)   # Saturday: never
+        n.check(snap(hours(5 * 24 + 10, 5 * 24 + 15, n=150), 3), self.now)   # Sunday: never
+        self.assertEqual(n.sent, [])
+        n.check(snap(hours(34, 39), 4), self.now)                  # Wednesday, announced the day before
+        self.assertEqual(len(n.sent), 1)
+        morning = DAY0 + 24 * HOUR + 7 * HOUR + 15 * 60_000          # 08:15 on Wednesday
+        n.check(snap(hours(36, 41), 5), morning)                   # moved: no update on the day
+        n.check(snap(hours(0, 0), 6), morning + HOUR)              # gone: no call-off on the day
+        n.check(snap(hours(0, 0), 7), morning + 2 * HOUR)
+        self.assertEqual(len(n.sent), 1)
 
     def test_inactive_without_token_or_chat(self):
         n = notify.Notifier(Path(self.tmp.name), {"chat_id": "-100"})

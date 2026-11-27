@@ -5,6 +5,10 @@ announced once. Afterwards the team only hears about it again if it moves or cha
 change_hours or more, if it disappears from cancel_after forecast updates in a row, or on the
 morning of the day (optional reminder). What has been announced is kept in notify_state.json.
 
+The team decides the day before, so by default only windows on later days are announced, and
+nothing more is said about a window once its day has come (same_day = true brings back alerts and
+the morning reminder for the same day). Windows on days not in fly_days are never announced.
+
 The bot token comes from the TELEGRAM_BOT_TOKEN environment variable (or secrets.env);
 the chat to post to is chat_id under [notify].
 """
@@ -24,6 +28,7 @@ log = logging.getLogger("kitewind")
 HOUR = 3_600_000
 API = "https://api.telegram.org/bot{token}/{method}"
 
+DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 DAYS = {"es": ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"],
         "en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
 WORDS = {
@@ -95,6 +100,9 @@ class Notifier:
         self.offset_h = float(settings.get("utc_offset_h", 1))
         self.eu_dst = bool(settings.get("eu_summer_time", True))
         self.page_url = settings.get("page_url", "") or page_url
+        self.fly_days = {DAY_KEYS.index(d[:3].lower()) for d in settings.get("fly_days", DAY_KEYS)
+                         if d[:3].lower() in DAY_KEYS}
+        self.same_day = bool(settings.get("same_day", True))
         self.active = bool(self.token and self.chat_id) and not demo
         self.state = self._load()
 
@@ -197,12 +205,22 @@ class Notifier:
                         counts[k] = counts.get(k, 0) + 1
         return max(counts, key=counts.get) if counts else "other"
 
+    def _wanted(self, w: dict, now_ms: int) -> bool:
+        """Whether the team wants to hear about this window: a flying day, and (unless same_day)
+        not today or earlier, since they decide the day before."""
+        if w["end"] <= now_ms:
+            return False
+        day = local_time(w["start"], self.offset_h, self.eu_dst).date()
+        if day.weekday() not in self.fly_days:
+            return False
+        return self.same_day or day > local_time(now_ms, self.offset_h, self.eu_dst).date()
+
     def _compare(self, snap: dict, now_ms: int, min_wind: float) -> bool:
-        current = [w for w in find_windows(snap["hours"], self.min_hours) if w["end"] > now_ms]
+        current = [w for w in find_windows(snap["hours"], self.min_hours) if self._wanted(w, now_ms)]
         kept, ok, matched = [], True, set()
         for w in self.state["windows"]:
-            if w["end"] <= now_ms:
-                continue  # over: forget it quietly
+            if not self._wanted(w, now_ms):
+                continue  # over, or its day has come: forget it quietly
             same = [c for c in current if _overlap(c, w)]
             if same:
                 c = max(same, key=lambda x: x["end"] - x["start"])
@@ -237,7 +255,7 @@ class Notifier:
         return ok
 
     def _remind(self, now_ms: int, min_wind: float) -> None:
-        if self.morning_hour < 0:
+        if self.morning_hour < 0 or not self.same_day:
             return
         now = local_time(now_ms, self.offset_h, self.eu_dst)
         if not (self.morning_hour <= now.hour < self.morning_hour + 3):

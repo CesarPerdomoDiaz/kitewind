@@ -188,7 +188,12 @@ min_hours = 2
 change_hours = 2
 # Forecast updates in a row without the window before it is called off.
 cancel_after = 2
-# Local hour of the same-day reminder (-1: none). Times use the offset and EU summer time below.
+# Days with alerts (the team never flies at weekends).
+fly_days = ["mon", "tue", "wed", "thu", "fri"]
+# Alerts about today's windows. Off: the team decides the day before, so once a window's day has
+# come nothing more is sent about it (no new window, update, call-off or morning reminder).
+same_day = false
+# Local hour of the same-day reminder (-1: none; only with same_day = true). Times use the offset and EU summer time below.
 morning_hour = 8
 utc_offset_h = 1
 eu_summer_time = true
